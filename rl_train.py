@@ -10,9 +10,10 @@ from rl.td3 import TD3
 def parse_args():
     """Parse training arguments."""
     parser = argparse.ArgumentParser(description="Train the RL agent")
-    parser.add_argument("--config", type=str, default="td3_lss.yaml")
+    parser.add_argument("--config", type=str, default="td3.yaml")
     parser.add_argument("--resume_last", action="store_true")
     parser.add_argument("--alg", type=str, default="td3")
+    parser.add_argument('-f')
 
     args = parser.parse_args()
     return args

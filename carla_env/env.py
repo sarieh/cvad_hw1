@@ -69,6 +69,7 @@ class Env():
                 self.client.set_timeout(20.0)
                 self._world = self.client.get_world()
                 client_is_initialized = True
+
             except RuntimeError as err:
                 if counter > 3:
                     print(err)

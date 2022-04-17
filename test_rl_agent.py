@@ -12,9 +12,9 @@ def parse_args():
     """Parse training arguments."""
     parser = argparse.ArgumentParser(description="Evaluate an RL agent")
     parser.add_argument("--config", type=str, default="td3.yaml")
-    parser.add_argument("--ckpt", type=str,
-                        default="last_td3.ckpt")
+    parser.add_argument("--ckpt", type=str, default="last_td3.ckpt")
     parser.add_argument("--attempts", type=int, default=100)
+    parser.add_argument("-f")
 
     args = parser.parse_args()
     return args

@@ -22,6 +22,7 @@ def sensor_callback(name, queue, process_fn=None):
 
 class SensorManager():
     """Sensor suite for CARLA RL environment."""
+
     def __init__(self, blp_lib, requested_sensors):
         # Fixed attributes
         self._blp_lib = blp_lib

@@ -45,6 +45,8 @@ class BaseOffPolicy(ABC):
         self._visualizer = get_visualizer(config)
         self._replay_buffer = ReplayBuffer(config["replay_buffer_size"])
 
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     def load_ckpt(self, checkpoint_path):
         checkpoint = torch.load(checkpoint_path)
         self.policy.load_state_dict(checkpoint["policy_state_dict"])
@@ -113,16 +115,14 @@ class BaseOffPolicy(ABC):
                         self.best_eval_return = ep_return["reward"]
                         print("New best eval return: {}".format(ep_return["reward"]))
                         print("Saving as best checkpoint")
-                        self.save_checkpoint(f"best_{self.config['experiment_name']}.ckpt",
-                                             include_replay_buffer=False)
+                        self.save_checkpoint(f"best_{self.config['experiment_name']}.ckpt", include_replay_buffer=False)
                     print("-" * 80)
                 state, is_terminal = self._reset_env()
 
             # Update if it's time
             if self._should_update():
                 rb_list = self._replay_buffer.to_list()
-                loader = DataLoader(rb_list, self.config["batch_size"],
-                                    shuffle=True, pin_memory=True, drop_last=True)
+                loader = DataLoader(rb_list, self.config["batch_size"], shuffle=True, pin_memory=True, drop_last=True)
                 self._update(loader)
                 self.num_update += 1
 
@@ -135,10 +135,6 @@ class BaseOffPolicy(ABC):
                 print("Saving checkpoint" + " " * 60)
                 self.save_checkpoint("last_" + self.config["experiment_name"] + ".ckpt")
                 print("-" * 80)
-
-        print("Saving checkpoint")
-        self.save_checkpoint("last_" + self.config["experiment_name"] + ".ckpt")
-        print("-" * 80)
 
     def test_agent(self, num_trials=5):
         total_ep_step = 0
@@ -200,6 +196,9 @@ class BaseOffPolicy(ABC):
         }
         if include_replay_buffer:
             ckpt["replay_buffer_q"] = self._replay_buffer.q
+
+        import os
+        print("#" * 20, os.getcwd())
         torch.save(ckpt, join("checkpoints", "rl", ckpt_str))
 
     def _update(self, loader):
@@ -209,6 +208,7 @@ class BaseOffPolicy(ABC):
         mean_q_loss = 0
         mean_p_loss = 0
         for i, data in enumerate(loader):
+
             if i == self.config["update_every"]:
                 break
             iter_loss = 0
@@ -261,8 +261,8 @@ class BaseOffPolicy(ABC):
 
     def _make_models(self, config):
         """Creates models according to configs, sends them to GPU and returns them."""
-        policy = MultiLayerPolicy()
-        target_policy = MultiLayerPolicy()
+        policy = MultiLayerPolicy(config)
+        target_policy = MultiLayerPolicy(config)
         q_nets = [MultiLayerQ(config) for _ in range(2)]
         target_q_nets = [MultiLayerQ(config) for _ in range(2)]
 
